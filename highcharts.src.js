@@ -30,12 +30,11 @@
  * - Improve pies: shadow, better dataLabels, 3D view.
  *
  */
-(function() {
+(function () {
 
 	// encapsulated variables
 	// abstracts to make compiled code smaller
-	var undefined,
-		doc = document,
+	var undefined, doc = document,
 		win = window,
 		math = Math,
 		mathRound = math.round,
@@ -51,9 +50,7 @@
 		isIE = /msie/i.test(userAgent) && !win.opera,
 		isWebKit = /AppleWebKit/.test(userAgent),
 		styleTag, canvasCounter = 0,
-		colorCounter,
-		symbolCounter,
-		symbolSizes = {},
+		colorCounter, symbolCounter, symbolSizes = {},
 		idCounter = 0,
 		timeFactor = 1,
 		// 1 = JavaScript time, 1000 = Unix time
@@ -69,18 +66,7 @@
 		PX = 'px',
 
 		// time methods, changed based on whether or not UTC is used
-		makeTime,
-		getMinutes,
-		getHours,
-		getDay,
-		getDate,
-		getMonth,
-		getFullYear,
-		setMinutes,
-		setHours,
-		setDate,
-		setMonth,
-		setFullYear,
+		makeTime, getMinutes, getHours, getDay, getDate, getMonth, getFullYear, setMinutes, setHours, setDate, setMonth, setFullYear,
 
 		// check for a custom HighchartsAdapter defined prior to this file
 		globalAdapter = win.HighchartsAdapter,
@@ -106,7 +92,7 @@
 	// the jQuery adapter
 	if (!globalAdapter && win.jQuery) {
 		var jQ = jQuery;
-		each = function(arr, fn) {
+		each = function (arr, fn) {
 			for (var i = 0, len = arr.length; i < len; i++) {
 				if (fn.call(arr[i], arr[i], i, arr) === false) {
 					return i;
@@ -114,7 +100,7 @@
 			}
 		};
 		grep = jQ.grep;
-		map = function(arr, fn) {
+		map = function (arr, fn) {
 			//return jQuery.map(arr, fn);
 			var results = [];
 			for (var i = 0, len = arr.length; i < len; i++) {
@@ -122,19 +108,19 @@
 			}
 			return results;
 		};
-		merge = function() {
+		merge = function () {
 			var args = arguments;
 			return jQ.extend(true, null, args[0], args[1], args[2], args[3]);
 		};
-		hyphenate = function(str) {
-			return str.replace(/([A-Z])/g, function(a, b) {
+		hyphenate = function (str) {
+			return str.replace(/([A-Z])/g, function (a, b) {
 				return '-' + b.toLowerCase();
 			});
 		};
-		addEvent = function(el, event, fn) {
+		addEvent = function (el, event, fn) {
 			jQ(el).bind(event, fn);
 		};
-		fireEvent = function(el, type, eventArguments, defaultFunction) {
+		fireEvent = function (el, type, eventArguments, defaultFunction) {
 			var event = jQ.Event(type),
 				detachedType = 'detached' + type;
 			extend(event, eventArguments);
@@ -160,15 +146,15 @@
 				defaultFunction(event);
 			}
 		};
-		animate = function(el, params, options) {
+		animate = function (el, params, options) {
 			jQ(el).animate(params, options);
 		};
-		getAjax = function(url, callback) {
+		getAjax = function (url, callback) {
 			jQ.get(url, null, callback);
 		};
 
 		jQ.extend(jQ.easing, {
-			easeOutQuad: function(x, t, b, c, d) {
+			easeOutQuad: function (x, t, b, c, d) {
 				return -c * (t /= d) * (t - 2) + b;
 			}
 		});
@@ -178,21 +164,21 @@
 
 		each = $each;
 
-		map = function(arr, fn) {
+		map = function (arr, fn) {
 			return arr.map(fn);
 		};
 
-		grep = function(arr, fn) {
+		grep = function (arr, fn) {
 			return arr.filter(fn);
 		};
 
 		merge = $merge;
 
-		hyphenate = function(str) {
+		hyphenate = function (str) {
 			return str.hyphenate();
 		};
 
-		addEvent = function(el, type, fn) {
+		addEvent = function (el, type, fn) {
 			// if the addEvent method is not defined, el is a custom Highcharts object
 			// like series or point
 			if (!el.addEvent) {
@@ -204,7 +190,7 @@
 			}
 			el.addEvent(type, fn);
 		};
-		fireEvent = function(el, event, eventArguments, defaultFunction) {
+		fireEvent = function (el, event, eventArguments, defaultFunction) {
 			// create an event object that keeps all functions
 			event = new Event({
 				type: event,
@@ -213,7 +199,7 @@
 			event = extend(event, eventArguments);
 			// override the preventDefault function to be able to use
 			// this for custom events
-			event.preventDefault = function() {
+			event.preventDefault = function () {
 				defaultFunction = null;
 			};
 			// if fireEvent is not available on the object, there hasn't been added
@@ -227,13 +213,13 @@
 				defaultFunction(event);
 			}
 		};
-		animate = function(el, params, options) {
+		animate = function (el, params, options) {
 			var myEffect = new Fx.Morph($(el), extend(options, {
 				transition: Fx.Transitions.Quad.easeInOut
 			}));
 			myEffect.start(params);
 		};
-		getAjax = function(url, callback) {
+		getAjax = function (url, callback) {
 			(new Request({
 				url: url,
 				method: 'get',
@@ -285,7 +271,7 @@
 
 		var key, serialized = '',
 			styleSheets, last, media = print ? 'print' : '',
-			createStyleTag = function(print) {
+			createStyleTag = function (print) {
 				return createElement('style', {
 					type: 'text/css',
 					media: print ? 'print' : ''
@@ -307,8 +293,7 @@
 			styleTag.appendChild(doc.createTextNode(selector + ' {' + serialized + '}\n'));
 		} else { // get the last stylesheet and add rules
 			var styleSheets = doc.styleSheets,
-				index,
-				styleSheet;
+				index, styleSheet;
 
 			if (print) { // only in IE for now
 				createStyleTag(true);
@@ -387,12 +372,12 @@
 		},
 		defaultOptions = {
 			colors: ['#4572A7', '#AA4643', '#89A54E', '#80699B', '#3D96AE',
-						'#DB843D', '#92A8CD', '#A47D7C', '#B5CA92'],
+										'#DB843D', '#92A8CD', '#A47D7C', '#B5CA92'],
 			symbols: ['circle', 'diamond', 'square', 'triangle', 'triangle-down'],
 			lang: {
 				loading: 'Loading...',
 				months: ['January', 'February', 'March', 'April', 'May', 'June', 'July',
-									'August', 'September', 'October', 'November', 'December'],
+														'August', 'September', 'October', 'November', 'December'],
 				weekdays: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
 				decimalPoint: '.',
 				resetZoom: 'Reset zoom',
@@ -483,7 +468,7 @@
 					dataLabels: merge(defaultLabelOptions, {
 						enabled: false,
 						y: -6,
-						formatter: function() {
+						formatter: function () {
 							return this.y;
 						}
 					}),
@@ -517,7 +502,7 @@
 			legend: {
 				enabled: true,
 				layout: 'horizontal',
-				labelFormatter: function() {
+				labelFormatter: function () {
 					return this.name;
 				},
 				//borderWidth: 0,
@@ -573,7 +558,7 @@
 
 			tooltip: {
 				enabled: true,
-				formatter: function() {
+				formatter: function () {
 					var pThis = this,
 						series = pThis.series,
 						xAxis = series.xAxis,
@@ -813,7 +798,7 @@
 
 	// class-like inheritance
 	function extendClass(parent, members) {
-		var object = function() {};
+		var object = function () {};
 		object.prototype = new parent();
 		extend(object.prototype, members);
 		return object;
@@ -846,7 +831,7 @@ function reverseArray(arr) {
 
 		} else if (val.linearGradient) {
 			var gradient = ctx.createLinearGradient.apply(ctx, val.linearGradient);
-			each(val.stops, function(stop) {
+			each(val.stops, function (stop) {
 				gradient.addColorStop(stop[0], stop[1]);
 			});
 			return gradient;
@@ -854,7 +839,7 @@ function reverseArray(arr) {
 	}
 
 
-	var Color = function(input) {
+	var Color = function (input) {
 			var rgba = [],
 				result;
 
@@ -873,9 +858,8 @@ function reverseArray(arr) {
 				// it's NaN if gradient colors on a column chart
 				if (rgba && !isNaN(rgba[0])) {
 					return 'rgba(' + rgba.join(',') + ')';
-				}
-				else
-				{return input;
+				} else {
+					return input;
 				}
 			}
 
@@ -906,7 +890,6 @@ function reverseArray(arr) {
 		};
 
 	//defaultMarkers = ['circle'];
-
 	function createElement(tag, attribs, styles, parent, nopad) {
 		var el = doc.createElement(tag);
 		if (attribs) extend(el, attribs);
@@ -1033,7 +1016,7 @@ function reverseArray(arr) {
 	function setTimeMethods() {
 		var useUTC = defaultOptions.global.useUTC;
 
-		makeTime = useUTC ? Date.UTC : function(year, month, date, hours, minutes, seconds) {
+		makeTime = useUTC ? Date.UTC : function (year, month, date, hours, minutes, seconds) {
 			return new Date(
 			year, month, pick(date, 1), pick(hours, 0), pick(minutes, 0), pick(seconds, 0)).getTime();
 		};
@@ -1073,7 +1056,7 @@ function reverseArray(arr) {
 	}
 
 
-	var Layer = function(name, appendTo, props, styles) {
+	var Layer = function (name, appendTo, props, styles) {
 			var layer = this,
 				div, appendToStyle = appendTo.style;
 			props = extend({
@@ -1107,7 +1090,7 @@ function reverseArray(arr) {
 			layer.basicSvg = layer.svg;
 		}
 	Layer.prototype = {
-		getCtx: function() {
+		getCtx: function () {
 			if (!this.ctx) {
 				var cvs = createElement('canvas', {
 					id: 'highcharts-canvas-' + idCounter++,
@@ -1127,7 +1110,7 @@ function reverseArray(arr) {
 
 			return this.ctx;
 		},
-		getSvg: function() {
+		getSvg: function () {
 			if (!this.svgObject) {
 				var layer = this,
 					div = layer.div,
@@ -1162,7 +1145,7 @@ function reverseArray(arr) {
 			}
 			return this.svgObject;
 		},
-		drawLine: function(x1, y1, x2, y2, color, width) {
+		drawLine: function (x1, y1, x2, y2, color, width) {
 			var ctx = this.getCtx(),
 				xBefore = x1;
 
@@ -1183,12 +1166,12 @@ function reverseArray(arr) {
 			ctx.stroke();
 		},
 
-		drawPolyLine: function(points, color, width, shadow, fillColor) {
+		drawPolyLine: function (points, color, width, shadow, fillColor) {
 			var ctx = this.getCtx(),
 				shadowLine = [];
 			// the shadow
 			if (shadow && width) {
-				each(points, function(point) { // add 1px offset
+				each(points, function (point) { // add 1px offset
 					shadowLine.push(point === undefined ? point : point + 1);
 				});
 				for (var i = 1; i <= 3; i++) // three lines of differing thickness and opacity
@@ -1219,9 +1202,9 @@ function reverseArray(arr) {
 			}
 
 		},
-		drawRect: function(x, y, w, h, color, width, radius, fill, shadow, image) {
+		drawRect: function (x, y, w, h, color, width, radius, fill, shadow, image) {
 			// must (?) be done twice to apply both stroke and fill in excanvas
-			var drawPath = function() {
+			var drawPath = function () {
 					var ret;
 					if (w > 0 && h > 0) { // zero or negative dimensions break Opera 10
 						ctx.beginPath();
@@ -1277,7 +1260,7 @@ function reverseArray(arr) {
 			}
 
 		},
-		drawSymbol: function(symbol, x, y, radius, lineWidth, lineColor, fillColor) {
+		drawSymbol: function (symbol, x, y, radius, lineWidth, lineColor, fillColor) {
 			var ctx = this.getCtx(),
 				imageRegex = /^url\((.*?)\)$/;
 			ctx.beginPath();
@@ -1313,7 +1296,7 @@ function reverseArray(arr) {
 
 			} else if (imageRegex.test(symbol)) {
 				createElement('img', {
-					onload: function() {
+					onload: function () {
 						var img = this,
 							size = symbolSizes[img.src] || [img.width, img.height];
 						setStyles(img, {
@@ -1347,7 +1330,7 @@ function reverseArray(arr) {
 				ctx.stroke();
 			}
 		},
-		drawHtml: function(html, attributes, styles) {
+		drawHtml: function (html, attributes, styles) {
 			createElement(
 			DIV, extend(attributes, {
 				innerHTML: html
@@ -1367,11 +1350,11 @@ function reverseArray(arr) {
 		 * @param {number} rotation
 		 * @param {string} align
 		 */
-		drawText: function() {
+		drawText: function () {
 			this.addText.apply(this, arguments);
 			this.strokeText();
 		},
-		addText: function(str, x, y, style, rotation, align) {
+		addText: function (str, x, y, style, rotation, align) {
 			if (str || str === 0) {
 
 				// declare variables
@@ -1389,7 +1372,7 @@ function reverseArray(arr) {
 				for (var key in style) css += hyphenate(key) + ':' + style[key] + ';';
 
 				// what transform property is supported?
-				each(['MozTransform', 'WebkitTransform', 'transform'], function(str) {
+				each(['MozTransform', 'WebkitTransform', 'transform'], function (str) {
 					if (str in div.style) CSStransform = str;
 				});
 
@@ -1524,7 +1507,7 @@ function reverseArray(arr) {
 
 		}
 	},*/
-		strokeText: function() {
+		strokeText: function () {
 			if (this.hasObject) {
 				var svgObject = this.getSvg(),
 					svg = this.svg;
@@ -1539,7 +1522,7 @@ function reverseArray(arr) {
 				}
 			}
 		},
-		clear: function() {
+		clear: function () {
 			var layer = this,
 				div = this.div,
 				childNodes = div.childNodes,
@@ -1558,7 +1541,7 @@ function reverseArray(arr) {
 			}
 
 		},
-		hide: function() {
+		hide: function () {
 			setStyles(this.div, {
 				display: 'none'
 			});
@@ -1576,7 +1559,7 @@ function reverseArray(arr) {
 			layer.div.style.visibility = HIDDEN
 		}, 2000);*/
 		},
-		show: function() {
+		show: function () {
 			setStyles(this.div, {
 				display: ''
 			});
@@ -1585,7 +1568,7 @@ function reverseArray(arr) {
 		/**
 		 * Discard layer DOM elements and null the reference
 		 */
-		destroy: function() {
+		destroy: function () {
 			discardElement(this.div);
 			return null;
 		}
@@ -1607,7 +1590,7 @@ function reverseArray(arr) {
 			redraw = pick(redraw, true); // defaults to true
 			fireEvent(chart, 'addSeries', {
 				options: options
-			}, function() {
+			}, function () {
 				series = initSeries(options);
 				series.isDirty = true;
 
@@ -1625,7 +1608,7 @@ function reverseArray(arr) {
 			var redrawLegend = chart.isDirty;
 
 			// handle updated data in the series
-			each(series, function(serie) {
+			each(series, function (serie) {
 				if (serie.isDirty) { // prepare the data so axis can read it
 					serie.cleanData();
 					serie.getSegments();
@@ -1638,19 +1621,19 @@ function reverseArray(arr) {
 			maxTicks = null;
 			if (hasCartesianSeries) {
 				// set axes scales
-				each(axes, function(axis) {
+				each(axes, function (axis) {
 					axis.setScale();
 				});
 				adjustTickAmounts();
 
 				// redraw axes
-				each(axes, function(axis) {
+				each(axes, function (axis) {
 					if (axis.isDirty) axis.redraw();
 				});
 			}
 
 			// redraw affected series
-			each(series, function(serie) {
+			each(series, function (serie) {
 				if (serie.isDirty && serie.visible) serie.redraw();
 			});
 
@@ -1743,7 +1726,7 @@ function reverseArray(arr) {
 				opacity: 0
 			}, {
 				duration: options.loading.hideDuration,
-				complete: function() {
+				complete: function () {
 					setStyles(loadingLayer, {
 						display: 'none'
 					});
@@ -1800,13 +1783,13 @@ function reverseArray(arr) {
 
 			// make sure the options are arrays and add some members
 			xAxisOptions = splat(xAxisOptions);
-			each(xAxisOptions, function(axis, i) {
+			each(xAxisOptions, function (axis, i) {
 				axis.index = i;
 				axis.isX = true;
 			});
 
 			yAxisOptions = splat(yAxisOptions);
-			each(yAxisOptions, function(axis, i) {
+			each(yAxisOptions, function (axis, i) {
 				axis.index = i;
 			});
 
@@ -1816,7 +1799,7 @@ function reverseArray(arr) {
 			// loop the options and construct axis objects
 			chart.xAxis = [];
 			chart.yAxis = [];
-			axes = map(axes, function(axisOptions) {
+			axes = map(axes, function (axisOptions) {
 				axis = new Axis(chart, axisOptions);
 				chart[axis.isXAxis ? 'xAxis' : 'yAxis'].push(axis);
 
@@ -1830,7 +1813,7 @@ function reverseArray(arr) {
 		 * Adjust all axes tick amounts
 		 */
 		function adjustTickAmounts() {
-			if (optionsChart.alignTicks !== false) each(axes, function(axis) {
+			if (optionsChart.alignTicks !== false) each(axes, function (axis) {
 				axis.adjustTickAmount();
 			});
 		}
@@ -1839,8 +1822,8 @@ function reverseArray(arr) {
 		 */
 		function getSelectedPoints() {
 			var points = [];
-			each(series, function(serie) {
-				points = points.concat(grep(serie.data, function(point) {
+			each(series, function (serie) {
+				points = points.concat(grep(serie.data, function (point) {
 					return point.selected;
 				}));
 			});
@@ -1851,7 +1834,7 @@ function reverseArray(arr) {
 		 * Get the currently selected series
 		 */
 		function getSelectedSeries() {
-			return grep(series, function(serie) {
+			return grep(series, function (serie) {
 				return serie.selected;
 			});
 		}
@@ -1864,7 +1847,7 @@ function reverseArray(arr) {
 			var lang = defaultOptions.lang;
 
 			// add button to reset selection
-			chart.toolbar.add('zoom', lang.resetZoom, lang.resetZoomTitle, function() {
+			chart.toolbar.add('zoom', lang.resetZoom, lang.resetZoomTitle, function () {
 				//zoom(false);
 				fireEvent(chart, 'selection', {
 					resetSelection: true
@@ -1874,13 +1857,13 @@ function reverseArray(arr) {
 
 
 			// if zoom is called with no arguments, reset the axes
-			if (!event || event.resetSelection) each(axes, function(axis) {
+			if (!event || event.resetSelection) each(axes, function (axis) {
 				axis.setExtremes(null, null, false);
 			});
 
 			// else, zoom in on all axes
 			else {
-				each(event.xAxis.concat(event.yAxis), function(axisData) {
+				each(event.xAxis.concat(event.yAxis), function (axisData) {
 					var axis = axisData.axis;
 
 					// don't zoom more than maxZoom
@@ -1942,7 +1925,7 @@ function reverseArray(arr) {
 
 
 			// Prepare for the axis sizes
-			each(series, function(serie) {
+			each(series, function (serie) {
 				serie.translate();
 				serie.setTooltipPoints();
 				/*if (options.tooltip.enabled) */
@@ -1951,7 +1934,7 @@ function reverseArray(arr) {
 
 			chart.render = render;
 
-			setTimeout(function() { // IE(7) needs timeout
+			setTimeout(function () { // IE(7) needs timeout
 				render();
 				fireEvent(chart, 'load');
 
@@ -2038,7 +2021,7 @@ function reverseArray(arr) {
 
 
 			// Axes
-			if (hasCartesianSeries) each(axes, function(axis) {
+			if (hasCartesianSeries) each(axes, function (axis) {
 				axis.render();
 			});
 
@@ -2047,7 +2030,7 @@ function reverseArray(arr) {
 
 
 			// Labels
-			if (labels.items) each(labels.items, function() {
+			if (labels.items) each(labels.items, function () {
 				var attributes = extend({
 					className: 'highcharts-label'
 				}, this.attributes);
@@ -2055,7 +2038,7 @@ function reverseArray(arr) {
 			});
 
 			// The series
-			each(series, function(serie) {
+			each(series, function (serie) {
 				serie.render();
 			});
 
@@ -2131,7 +2114,7 @@ function reverseArray(arr) {
 			}
 
 			// destroy each series
-			each(series, function(serie) {
+			each(series, function (serie) {
 				serie.destroy();
 			});
 			series = [];
@@ -2170,12 +2153,12 @@ function reverseArray(arr) {
 				// get an overview of what series are associated with this axis
 				associatedSeries = [];
 
-				each(series, function(serie) {
+				each(series, function (serie) {
 					run = false;
 
 
 					// match this axis against the series' given or implicated axis
-					each(['xAxis', 'yAxis'], function(strAxis) {
+					each(['xAxis', 'yAxis'], function (strAxis) {
 						if (
 						// we're in the right x or y dimension, and...
 						(strAxis == 'xAxis' && isXAxis || strAxis == 'yAxis' && !isXAxis) && (
@@ -2212,7 +2195,7 @@ function reverseArray(arr) {
 							}
 						}
 						if (serie.isCartesian) { // line, column etc. need axes, pie doesn't
-							each(serie.data, function(point, i) {
+							each(serie.data, function (point, i) {
 								var pointX = point.x,
 									pointY = point.y;
 
@@ -2417,25 +2400,25 @@ function reverseArray(arr) {
 
 					units = [[
 						'second', // unit name
-											oneSecond, // fixed incremental unit
-											[1, 2, 5, 10, 15, 30] // allowed multiples
-											], [
+																oneSecond, // fixed incremental unit
+																[1, 2, 5, 10, 15, 30] // allowed multiples
+																], [
 						'minute', // unit name
-											oneMinute, // fixed incremental unit
-											[1, 2, 5, 10, 15, 30] // allowed multiples
-											], [
+																oneMinute, // fixed incremental unit
+																[1, 2, 5, 10, 15, 30] // allowed multiples
+																], [
 						'hour', // unit name
-											oneHour, // fixed incremental unit
-											[1, 2, 3, 4, 6, 8, 12] // allowed multiples
-											], [
+																oneHour, // fixed incremental unit
+																[1, 2, 3, 4, 6, 8, 12] // allowed multiples
+																], [
 						'day', // unit name
-											oneDay, // fixed incremental unit
-											[1, 2] // allowed multiples
-											], [
+																oneDay, // fixed incremental unit
+																[1, 2] // allowed multiples
+																], [
 						'week', // unit name
-											oneWeek, // fixed incremental unit
-											[1, 2] // allowed multiples
-											], [
+																oneWeek, // fixed incremental unit
+																[1, 2] // allowed multiples
+																], [
 						'month',
 						oneMonth,
 						[1, 2, 3, 4, 6]
@@ -2542,7 +2525,7 @@ function reverseArray(arr) {
 				tickPositions.push(time);
 
 				// dynamic label formatter
-				if (!options.labels.formatter) labelFormatter = function() {
+				if (!options.labels.formatter) labelFormatter = function () {
 					return dateFormat(options.dateTimeLabelFormats[unit[0]], this.value, 1);
 				}
 			}
@@ -2553,7 +2536,7 @@ function reverseArray(arr) {
 			 */
 			function setLinearTickPositions() {
 
-				var correctFloat = function(num) { // JS round off float errors
+				var correctFloat = function (num) { // JS round off float errors
 						var invMag = (magnitude < 1 ? mathRound(1 / magnitude) : 1) * 10;
 
 						return mathRound(num * invMag) / invMag;
@@ -2564,7 +2547,6 @@ function reverseArray(arr) {
 				// default extreme ticks when axis does not start and end on a tick
 				//firstTickPosition = roundedMin + tickInterval,
 				//lastTickPosition = roundedMax - tickInterval,
-
 				//invMag = (magnitude < 1 ? 1 / magnitude : 1) * 10; // round off JS float errors;
 				tickPositions = [];
 
@@ -2585,7 +2567,7 @@ function reverseArray(arr) {
 				}
 
 				// dynamic label formatter
-				if (!labelFormatter) labelFormatter = function() {
+				if (!labelFormatter) labelFormatter = function () {
 					return this.value;
 				}
 
@@ -2718,7 +2700,7 @@ function reverseArray(arr) {
 				fireEvent(axis, 'setExtremes', { // fire an event to enable syncing of multiple charts
 					min: newMin,
 					max: newMax
-				}, function() { // the default event handler
+				}, function () { // the default event handler
 					// make sure categorized axes are not exceeded
 					if (categories) {
 						if (newMin < 0) newMin = 0;
@@ -2794,7 +2776,7 @@ function reverseArray(arr) {
 			 * @param {Object} id
 			 */
 			function removePlotBandOrLine(id) {
-				each([plotBands, plotLines], function(collection) {
+				each([plotBands, plotLines], function (collection) {
 					for (var i = 0; i < collection.length; i++) {
 
 						if (collection[i].id == id) {
@@ -2819,7 +2801,7 @@ function reverseArray(arr) {
 				render();
 
 				// mark associated series as dirty and ready for redraw
-				each(associatedSeries, function(series) {
+				each(associatedSeries, function (series) {
 					series.isDirty = true;
 				});
 
@@ -2844,7 +2826,7 @@ function reverseArray(arr) {
 
 					// alternate grid color
 					if (alternateGridColor) {
-						each(tickPositions, function(pos, i) {
+						each(tickPositions, function (pos, i) {
 							if (i % 2 == 0 && pos < max) {
 								drawPlotBand(
 								pos, tickPositions[i + 1] !== undefined ? tickPositions[i + 1] : max, alternateGridColor);
@@ -2853,7 +2835,7 @@ function reverseArray(arr) {
 					}
 
 					// custom plot bands (behind grid lines)
-					each(plotBands, function(plotBand) {
+					each(plotBands, function (plotBand) {
 						drawPlotBand(plotBand.from, plotBand.to, plotBand.color);
 					});
 
@@ -2864,7 +2846,7 @@ function reverseArray(arr) {
 						i, options.minorTickPosition, options.minorTickColor, minorTickWidth, options.minorTickLength);
 					}
 					// grid lines and tick marks
-					each(tickPositions, function(pos, index) {
+					each(tickPositions, function (pos, index) {
 						tickmarkPos = pos + tickmarkOffset;
 
 						// add the grid line
@@ -2878,7 +2860,7 @@ function reverseArray(arr) {
 
 
 					// custom plot lines (in front of grid lines)
-					each(plotLines, function(plotLine) {
+					each(plotLines, function (plotLine) {
 						drawPlotLine(plotLine.value, plotLine.color, plotLine.width);
 					});
 
@@ -3086,7 +3068,7 @@ function reverseArray(arr) {
 					xAxis: [],
 					yAxis: []
 				};
-				each(axes, function(axis, i) {
+				each(axes, function (axis, i) {
 					var translate = axis.translate,
 						isXAxis = axis.isXAxis,
 						isHorizontal = inverted ? !isXAxis : isXAxis;
@@ -3128,7 +3110,7 @@ function reverseArray(arr) {
 			 */
 			function setDOMEvents() {
 
-				imagemap.onmousedown = function(e) {
+				imagemap.onmousedown = function (e) {
 					e = normalizeMouseEvent(e);
 
 					// record the start position
@@ -3169,7 +3151,7 @@ function reverseArray(arr) {
 
 				// Use native browser event for this one. It's faster, and MooTools
 				// doesn't use clientX and clientY.
-				imagemap.onmousemove = function(e) {
+				imagemap.onmousemove = function (e) {
 					e = normalizeMouseEvent(e);
 					e.returnValue = false;
 					if (mouseIsDown) { // make selection
@@ -3237,7 +3219,7 @@ function reverseArray(arr) {
 					}
 					return false;
 				};
-				imagemap.onmouseup = function() {
+				imagemap.onmouseup = function () {
 					var selectionIsMade;
 
 					if (selectionMarker) {
@@ -3255,7 +3237,7 @@ function reverseArray(arr) {
 						if (hasDragged) {
 
 							// record each axis' min and max
-							each(axes, function(axis, i) {
+							each(axes, function (axis, i) {
 								var translate = axis.translate,
 									isXAxis = axis.isXAxis,
 									isHorizontal = inverted ? !isXAxis : isXAxis,
@@ -3289,7 +3271,7 @@ function reverseArray(arr) {
 				};
 
 				// MooTools 1.2.4 doesn't handle this 'mouseleave' in IE
-				imagemap.onmouseout = function(e) {
+				imagemap.onmouseout = function (e) {
 					e = e || win.event;
 					var related = e.relatedTarget || e.toElement;
 
@@ -3308,7 +3290,7 @@ function reverseArray(arr) {
 				}
 
 				// MooTools 1.2.3 doesn't fire this in IE when using addEvent
-				imagemap.onclick = function(e) {
+				imagemap.onclick = function (e) {
 					e = normalizeMouseEvent(e);
 
 					e.cancelBubble = true; // IE specific
@@ -3470,7 +3452,7 @@ function reverseArray(arr) {
 			setDOMEvents();
 
 			// set the fixed interval ticking for the smooth tooltip
-			setInterval(function() {
+			setInterval(function () {
 				if (tooltipTick) tooltipTick();
 			}, 32);
 
@@ -3489,7 +3471,7 @@ function reverseArray(arr) {
 		 * The overview of the chart's series
 		 * @param {Object} chart
 		 */
-		var Legend = function(chart) {
+		var Legend = function (chart) {
 				// already existing
 				//if (chart.legend) return;
 				var options = chart.options.legend;
@@ -3533,7 +3515,7 @@ function reverseArray(arr) {
 
 				function renderHTML(clear) {
 					if (clear) {
-						each(allItems, function(item) {
+						each(allItems, function (item) {
 							discardElement(item.legendItem);
 						});
 						allItems = [];
@@ -3543,14 +3525,14 @@ function reverseArray(arr) {
 					if (reversedLegend) {
 						series.reverse();
 					}
-					each(series, function(serie) {
+					each(series, function (serie) {
 						if (!serie.options.showInLegend) return;
 
 						// use points or series for the legend item depending on legendType
 						var items = (serie.options.legendType == 'point') ? serie.data : [serie];
 
 
-						each(items, function(item) {
+						each(items, function (item) {
 							// let these series types use a simple symbol
 							item.simpleSymbol = /(bar|pie|area|column)/.test(serie.type);
 
@@ -3573,16 +3555,16 @@ function reverseArray(arr) {
 							}
 
 							// add the events
-							addEvent(li, 'mouseover', function() {
+							addEvent(li, 'mouseover', function () {
 								item.setState('hover');
 							});
-							addEvent(li, 'mouseout', function() {
+							addEvent(li, 'mouseout', function () {
 								item.setState();
 							});
-							addEvent(li, 'click', function(event) {
+							addEvent(li, 'click', function (event) {
 								var target = event.target,
 									strLegendItemClick = 'legendItemClick',
-									fnLegendItemClick = function() {
+									fnLegendItemClick = function () {
 										item.setVisible();
 									};
 
@@ -3590,7 +3572,7 @@ function reverseArray(arr) {
 								if (target.tagName == 'INPUT') {
 									fireEvent(item, 'checkboxClick', {
 										checked: target.checked
-									}, function() {
+									}, function () {
 										item.select();
 									});
 
@@ -3631,7 +3613,7 @@ function reverseArray(arr) {
 
 
 						// Add the symbol after the list is complete.
-						each(allItems, function(item) {
+						each(allItems, function (item) {
 							if (!item.legendItem) return;
 
 							var li = item.legendItem,
@@ -3672,7 +3654,7 @@ function reverseArray(arr) {
 							tracker.insertAtFront(legendArea);
 
 							// note: using addEvent and mouseleave, mouseenter doesn't work with Moo in IE
-							legendArea.onmouseover = function(e) {
+							legendArea.onmouseover = function (e) {
 								e = e || win.event;
 								var relatedTarget = e.relatedTarget || e.fromElement;
 								if (relatedTarget != dom && !mouseIsDown) {
@@ -3682,7 +3664,7 @@ function reverseArray(arr) {
 									});
 								}
 							}
-							dom.onmouseout = legendArea.onmouseout = function(e) {
+							dom.onmouseout = legendArea.onmouseout = function (e) {
 								e = e || win.event;
 								var relatedTarget = e.relatedTarget || e.toElement;
 								if (relatedTarget && (relatedTarget == trackerImage || (relatedTarget.tagName == 'AREA' && relatedTarget != legendArea))) setStyles(dom, {
@@ -3833,7 +3815,7 @@ function reverseArray(arr) {
 
 				// run on next tick of the mouse tracker
 				if (mathAbs(finalX - x) > 1 || mathAbs(finalY - y) > 1) {
-					tooltipTick = function() {
+					tooltipTick = function () {
 						move(finalX, finalY);
 					};
 				} else {
@@ -3929,10 +3911,10 @@ function reverseArray(arr) {
 		}
 
 		// Chart member functions
-		chart.addLoading = function(loadingId) {
+		chart.addLoading = function (loadingId) {
 			chart.resources[loadingId] = false;
 		}
-		chart.clearLoading = function(loadingId) {
+		chart.clearLoading = function (loadingId) {
 			chart.resources[loadingId] = true;
 			checkResources();
 		}
@@ -3981,7 +3963,7 @@ function reverseArray(arr) {
 		if (optionsChart.plotBackgroundImage) {
 			chart.addLoading('plotBack');
 			plotBackground = createElement('img');
-			plotBackground.onload = function() {
+			plotBackground.onload = function () {
 				chart.clearLoading('plotBack');
 			}
 			plotBackground.src = optionsChart.plotBackgroundImage;
@@ -3989,7 +3971,7 @@ function reverseArray(arr) {
 
 		// Initialize the series
 		//initSeries();
-		each(options.series || [], function(serieOptions) {
+		each(options.series || [], function (serieOptions) {
 			initSeries(serieOptions);
 		});
 
@@ -4004,7 +3986,7 @@ function reverseArray(arr) {
 	/**
 	 * The Point object and prototype. Inheritable and used as base for PiePoint
 	 */
-	var Point = function() {};
+	var Point = function () {};
 	Point.prototype = {
 
 		/**
@@ -4012,7 +3994,7 @@ function reverseArray(arr) {
 		 * @param {Object} series The series object containing this point.
 		 * @param {Object} options The data in either number, array or object format.
 		 */
-		init: function(series, options) {
+		init: function (series, options) {
 			var point = this;
 			point.series = series;
 			point.applyOptions(options);
@@ -4025,7 +4007,7 @@ function reverseArray(arr) {
 		 *
 		 * @param {Object} options
 		 */
-		applyOptions: function(options) {
+		applyOptions: function (options) {
 			var point = this,
 				series = point.series,
 				n;
@@ -4073,7 +4055,7 @@ function reverseArray(arr) {
 		/**
 		 * Clear memory
 		 */
-		destroy: function() {
+		destroy: function () {
 			var point = this;
 
 			if (point.stateLayer) point.stateLayer.destroy();
@@ -4086,7 +4068,7 @@ function reverseArray(arr) {
 		 * @param {Boolean} accumulate Whether to add to the previous selection. By default,
 		 * 		this happens if the control key (Cmd on Mac) was pressed during clicking.
 		 */
-		select: function(selected, accumulate) {
+		select: function (selected, accumulate) {
 			var point = this,
 				series = point.series,
 				chart = series.chart,
@@ -4104,11 +4086,11 @@ function reverseArray(arr) {
 			if (singlePointLayer) singlePointLayer.clear();
 
 
-			each(chart.series, function(series) {
+			each(chart.series, function (series) {
 				stateLayers = series.stateLayers;
 
 				// unselect all other points unless Ctrl or Cmd + click
-				if (!accumulate) each(series.data, function(loopPoint) {
+				if (!accumulate) each(series.data, function (loopPoint) {
 					if (loopPoint.selected && loopPoint != point) {
 						loopPoint.selected = false;
 						fireEvent(loopPoint, 'unselect');
@@ -4136,7 +4118,7 @@ function reverseArray(arr) {
 		 * @param {Boolean} redraw Whether to redraw the chart or wait for an explicit call.
 		 *
 		 */
-		update: function(options, redraw) {
+		update: function (options, redraw) {
 			var point = this,
 				series = point.series;
 			redraw = pick(redraw, true);
@@ -4144,7 +4126,7 @@ function reverseArray(arr) {
 			// fire the event with a default handler of doing the update
 			point.firePointEvent('update', {
 				options: options
-			}, function() {
+			}, function () {
 
 				point.applyOptions(options);
 
@@ -4158,7 +4140,7 @@ function reverseArray(arr) {
 		 * Remove a point and optionally redraw the series and if necessary the axes
 		 * @param {Boolean} redraw Whether to redraw the chart or wait for an explicit call.
 		 */
-		remove: function(redraw) {
+		remove: function (redraw) {
 			var point = this,
 				series = point.series,
 				chart = series.chart,
@@ -4167,10 +4149,10 @@ function reverseArray(arr) {
 			redraw = pick(redraw, true);
 
 			// fire the event with a default handler of removing the point
-			point.firePointEvent('remove', null, function() {
+			point.firePointEvent('remove', null, function () {
 
 				// loop through the data to locate the point and remove it
-				each(data, function(existingPoint, i) {
+				each(data, function (existingPoint, i) {
 					if (existingPoint == point) {
 						data.splice(i, 1);
 					}
@@ -4199,7 +4181,7 @@ function reverseArray(arr) {
 		 * @param {Object} eventArgs Additional event arguments.
 		 * @param {Function} defaultFunction Default event handler.
 		 */
-		firePointEvent: function(eventType, eventArgs, defaultFunction) {
+		firePointEvent: function (eventType, eventArgs, defaultFunction) {
 			var point = this,
 				series = this.series,
 				seriesOptions = series.options;
@@ -4209,7 +4191,7 @@ function reverseArray(arr) {
 			point.options && point.options.events && point.options.events[eventType])) this.importEvents();
 
 			// add default handler if in selection mode
-			if (eventType == 'click' && seriesOptions.allowPointSelect) defaultFunction = function(event) {
+			if (eventType == 'click' && seriesOptions.allowPointSelect) defaultFunction = function (event) {
 				// Control key is for Windows, meta (= Cmd key) for Mac, Shift for Opera
 				point.select(null, event.ctrlKey || event.metaKey || event.shiftKey);
 			}
@@ -4220,7 +4202,7 @@ function reverseArray(arr) {
 		 * Import events from the series' and point's options. Only do it on
 		 * demand, to save processing time on hovering.
 		 */
-		importEvents: function() {
+		importEvents: function () {
 			if (!this.hasImportedEvents) {
 				var point = this,
 					options = merge(point.series.options.point, point.options),
@@ -4236,7 +4218,7 @@ function reverseArray(arr) {
 			}
 		},
 
-		setTooltipText: function() {
+		setTooltipText: function () {
 			var point = this;
 			point.tooltipText = point.series.chart.options.tooltip.formatter.call({
 				series: point.series,
@@ -4254,14 +4236,14 @@ function reverseArray(arr) {
 	 * @param {Object} chart
 	 * @param {Object} options
 	 */
-	var Series = function() {
+	var Series = function () {
 			this.isCartesian = true;
 			this.type = 'line';
 			this.pointClass = Point;
 		};
 
 	Series.prototype = {
-		init: function(chart, options) {
+		init: function (chart, options) {
 			var series = this,
 				eventType, events, pointEvent, index = chart.series.length;
 
@@ -4291,7 +4273,7 @@ function reverseArray(arr) {
 			series.getData(options);
 
 		},
-		getData: function(options) {
+		getData: function (options) {
 			var series = this,
 				chart = series.chart,
 				loadingId = 'series' + idCounter++;
@@ -4299,7 +4281,7 @@ function reverseArray(arr) {
 			// Ajax loaded data
 			if (!options.data && options.dataURL) {
 				chart.addLoading(loadingId);
-				getAjax(options.dataURL, function(data) {
+				getAjax(options.dataURL, function (data) {
 					series.dataLoaded(data);
 					chart.clearLoading(loadingId);
 				});
@@ -4307,7 +4289,7 @@ function reverseArray(arr) {
 				series.dataLoaded(options.data);
 			}
 		},
-		dataLoaded: function(data) {
+		dataLoaded: function (data) {
 			var series = this,
 				chart = series.chart,
 				options = series.options,
@@ -4320,7 +4302,7 @@ function reverseArray(arr) {
 				x;
 
 			// if no dataParser is defined for ajax loaded data, assume JSON and eval the code
-			if (options.dataURL && !dataParser) dataParser = function(data) {
+			if (options.dataURL && !dataParser) dataParser = function (data) {
 				return eval(data);
 			}
 			// dataParser is defined, run parsing
@@ -4333,7 +4315,7 @@ function reverseArray(arr) {
 			});
 
 			if (options.states.hover.enabled) enabledStates.push('hover');
-			each(enabledStates, function(state) { // create the state layers
+			each(enabledStates, function (state) { // create the state layers
 				stateLayers[state] = new Layer('state-' + state, layerGroup.div);
 			});
 			series.stateLayers = stateLayers;
@@ -4346,7 +4328,7 @@ function reverseArray(arr) {
 		 * Return an auto incremented x value based on the pointStart and pointInterval options.
 		 * This is only used if an x value is not given for the point that calls autoIncrement.
 		 */
-		autoIncrement: function() {
+		autoIncrement: function () {
 			var series = this,
 				options = series.options,
 				xIncrement = series.xIncrement;
@@ -4364,7 +4346,7 @@ function reverseArray(arr) {
 		 *
 		 * @todo: For reversed x axis, reverse the data once and for all here
 		 */
-		cleanData: function() {
+		cleanData: function () {
 			var series = this,
 				data = series.data,
 				i;
@@ -4372,7 +4354,7 @@ function reverseArray(arr) {
 			//closestPoints,
 			//interval;
 			// sort the data points
-			data.sort(function(a, b) {
+			data.sort(function (a, b) {
 				return (a.x - b.x);
 			});
 
@@ -4395,13 +4377,13 @@ function reverseArray(arr) {
 		 * Divide the series data into segments divided by null values. Also sort
 		 * the data points and delete duplicate values.
 		 */
-		getSegments: function() {
+		getSegments: function () {
 			var lastNull = -1,
 				segments = [],
 				data = this.data;
 
 			// create the segments
-			each(data, function(point, i) {
+			each(data, function (point, i) {
 				if (point.y === null) {
 					if (i > lastNull + 1) segments.push(data.slice(lastNull + 1, i));
 					lastNull = i;
@@ -4420,7 +4402,7 @@ function reverseArray(arr) {
 		 * Set the series options by merging from the options tree
 		 * @param {Object} options
 		 */
-		setOptions: function(options) {
+		setOptions: function (options) {
 			var plotOptions = this.chart.options.plotOptions,
 				options = merge(
 				plotOptions[this.type], plotOptions.series, options),
@@ -4435,12 +4417,12 @@ function reverseArray(arr) {
 			return options;
 
 		},
-		getColor: function() {
+		getColor: function () {
 			var defaultColors = this.chart.options.colors;
 			this.color = this.options.color || defaultColors[colorCounter++] || '#0000ff';
 			if (colorCounter >= defaultColors.length) colorCounter = 0;
 		},
-		getSymbol: function() {
+		getSymbol: function () {
 			var defaultSymbols = this.chart.options.symbols,
 				symbol = this.options.marker.symbol || 'auto';
 			if (symbol == 'auto') symbol = defaultSymbols[symbolCounter++];
@@ -4455,7 +4437,7 @@ function reverseArray(arr) {
 		 * @param {Boolean} shift If shift is true, a point is shifted off the start
 		 * 		of the series as one is appended to the end.
 		 */
-		addPoint: function(options, redraw, shift) {
+		addPoint: function (options, redraw, shift) {
 			var series = this,
 				data = series.data,
 				point = (new series.pointClass).init(series, options);
@@ -4476,7 +4458,7 @@ function reverseArray(arr) {
 		 * @param {Object} data
 		 * @param {Object} redraw
 		 */
-		setData: function(data, redraw) {
+		setData: function (data, redraw) {
 			var series = this;
 
 			// data.push(point);
@@ -4484,7 +4466,7 @@ function reverseArray(arr) {
 			// generate the point objects
 			//x = options.pointStart || 0;
 			series.xIncrement = null; // reset for new data
-			data = map(splat(data), function(pointOptions) {
+			data = map(splat(data), function (pointOptions) {
 				return (new series.pointClass).init(series, pointOptions);
 				//return new PiePoint(series, pointOptions);
 				//x += pointInterval;
@@ -4509,7 +4491,7 @@ function reverseArray(arr) {
 		 * @param {Boolean} redraw Whether to redraw the chart or wait for an explicit call.
 		 */
 
-		remove: function(redraw) {
+		remove: function (redraw) {
 			var series = this,
 				chart = series.chart;
 
@@ -4521,13 +4503,13 @@ function reverseArray(arr) {
 				series.isRemoving = true;
 
 				// fire the event with a default handler of removing the point
-				fireEvent(series, 'remove', null, function() {
+				fireEvent(series, 'remove', null, function () {
 
 					// remove the layer group
 					discardElement(series.layerGroup.div);
 
 					// remove the area
-					each(series.areas, function(area) {
+					each(series.areas, function (area) {
 						discardElement(area);
 					});
 
@@ -4537,7 +4519,7 @@ function reverseArray(arr) {
 
 
 					// loop through the chart series to locate the series and remove it
-					each(chart.series, function(existingSeries, i) {
+					each(chart.series, function (existingSeries, i) {
 						if (existingSeries == series) {
 							chart.series.splice(i, 1);
 						}
@@ -4555,7 +4537,7 @@ function reverseArray(arr) {
 		/**
 		 * Translate data points from raw values 0 and 1 to x and y.
 		 */
-		translate: function() {
+		translate: function () {
 			var chart = this.chart,
 				series = this,
 				stacking = series.options.stacking,
@@ -4564,7 +4546,7 @@ function reverseArray(arr) {
 				stack = yAxis.stacks[series.type];
 
 			// do the translation
-			each(this.data, function(point) {
+			each(this.data, function (point) {
 				var xValue = point.x,
 					yValue = point.y,
 					yBottom, pointStack, pointStackTotal;
@@ -4600,7 +4582,7 @@ function reverseArray(arr) {
 		/**
 		 * Memoize tooltip texts and positions
 		 */
-		setTooltipPoints: function(renew) {
+		setTooltipPoints: function (renew) {
 			var series = this,
 				chart = series.chart,
 				inverted = chart.inverted,
@@ -4612,14 +4594,14 @@ function reverseArray(arr) {
 			if (renew) series.tooltipPoints = null;
 
 			// concat segments to overcome null values
-			each(series.segments, function(segment) {
+			each(series.segments, function (segment) {
 				data = data.concat(segment);
 			});
 
 			// loop the concatenated data and apply each point to all the closest
 			// pixel positions
 			if (series.xAxis.reversed) data = data.reverse(); //reverseArray(data);
-			each(data, function(point, i) {
+			each(data, function (point, i) {
 
 
 				if (!series.tooltipPoints) // only create the text the first time, not on zoom
@@ -4640,7 +4622,7 @@ function reverseArray(arr) {
 		/**
 		 * Draw the actual graph
 		 */
-		drawLine: function(state) {
+		drawLine: function (state) {
 			var i, j, series = this,
 				options = series.options,
 				chart = series.chart,
@@ -4660,12 +4642,12 @@ function reverseArray(arr) {
 			if (doAnimation) series.animate(true);
 
 			// divide into segments
-			each(series.segments, function(segment) {
+			each(series.segments, function (segment) {
 				var line = [],
 					area = [];
 
 				// get the points
-				each(segment, function(point, i) {
+				each(segment, function (point, i) {
 					if (i && options.step) {
 						var lastPoint = segment[i - 1];
 						line.push(
@@ -4703,7 +4685,7 @@ function reverseArray(arr) {
 		/**
 		 * Experimental animation
 		 */
-		animate: function(init) {
+		animate: function (init) {
 			var series = this,
 				chart = series.chart,
 				inverted = chart.inverted,
@@ -4738,7 +4720,7 @@ function reverseArray(arr) {
 		/**
 		 * Draw the markers
 		 */
-		drawPoints: function(state) {
+		drawPoints: function (state) {
 			var series = this,
 				i, //state = series.state,
 				layer = series.stateLayers[state],
@@ -4759,7 +4741,7 @@ function reverseArray(arr) {
 		}*/
 
 			if (markerOptions.enabled) {
-				each(data, function(point) {
+				each(data, function (point) {
 					if (point.plotY !== undefined) series.drawMarker(
 					layer, inverted ? chart.plotWidth - point.plotY : point.plotX, inverted ? chart.plotHeight - point.plotX : point.plotY, merge(markerOptions, point.marker));
 
@@ -4782,7 +4764,7 @@ function reverseArray(arr) {
 		/**
 		 * Draw a single marker into a given layer and position
 		 */
-		drawMarker: function(layer, x, y, options) {
+		drawMarker: function (layer, x, y, options) {
 			if (options.lineColor == 'auto') options.lineColor = this.color;
 			if (options.fillColor == 'auto') options.fillColor = this.color;
 			if (options.symbol == 'auto') options.symbol = this.symbol;
@@ -4793,7 +4775,7 @@ function reverseArray(arr) {
 		/**
 		 * Draw the data labels
 		 */
-		drawDataLabels: function() {
+		drawDataLabels: function () {
 			if (this.options.dataLabels.enabled) {
 				var series = this,
 					i, x, y, data = series.data,
@@ -4818,7 +4800,7 @@ function reverseArray(arr) {
 				options.style.color = options.color == 'auto' ? series.color : options.color;
 
 				// make the labels for each point
-				each(data, function(point) {
+				each(data, function (point) {
 					var plotX = point.plotX,
 						plotY = point.plotY,
 						tooltipPos = point.tooltipPos;
@@ -4867,7 +4849,7 @@ function reverseArray(arr) {
 		/**
 		 * Draw a single point in a specific state
 		 */
-		drawPointState: function(point, state, layer) {
+		drawPointState: function (point, state, layer) {
 			var chart = this.chart,
 				inverted = chart.inverted,
 				isHoverState = state == 'hover',
@@ -4904,11 +4886,11 @@ function reverseArray(arr) {
 		/**
 		 * Clear DOM objects and free up memory
 		 */
-		destroy: function() {
+		destroy: function () {
 			var series = this,
 				prop;
 
-			each(series.data, function(point) {
+			each(series.data, function (point) {
 				point.destroy();
 			});
 
@@ -4918,7 +4900,7 @@ function reverseArray(arr) {
 		/**
 		 * Render the graph and markers
 		 */
-		render: function() {
+		render: function () {
 			var series = this,
 				state, stateLayers = series.stateLayers;
 
@@ -4940,7 +4922,7 @@ function reverseArray(arr) {
 		/**
 		 * Redraw the series after an update in the axes.
 		 */
-		redraw: function() {
+		redraw: function () {
 			var series = this;
 
 			series.translate();
@@ -4956,7 +4938,7 @@ function reverseArray(arr) {
 		/**
 		 * Clear all graphics and HTML from the series layer group
 		 */
-		clear: function() {
+		clear: function () {
 			var stateLayers = this.stateLayers;
 			for (var state in stateLayers) {
 				stateLayers[state].clear();
@@ -4971,7 +4953,7 @@ function reverseArray(arr) {
 		/**
 		 * Set the state of the graph and redraw
 		 */
-		setState: function(state) {
+		setState: function (state) {
 			state = state || '';
 			if (this.state != state) {
 
@@ -4999,7 +4981,7 @@ function reverseArray(arr) {
 		 * @param vis {Boolean} True to show the series, false to hide. If undefined,
 		 *        the visibility is toggled.
 		 */
-		setVisible: function(vis, redraw) {
+		setVisible: function (vis, redraw) {
 			var series = this,
 				chart = series.chart,
 				//imagemap = chart.imagemap,
@@ -5024,7 +5006,7 @@ function reverseArray(arr) {
 			}
 
 			// hide or show areas
-			if (areas) each(areas, function(area) {
+			if (areas) each(areas, function (area) {
 				if (vis)
 				//imagemap.insertBefore(area, imagemap.childNodes[1]);
 				chart.tracker.insertAtFront(area);
@@ -5035,7 +5017,7 @@ function reverseArray(arr) {
 			if (chart.options.chart.ignoreHiddenSeries) {
 
 				// in a stack, all other series are affected
-				if (series.options.stacking) each(chart.series, function(otherSeries) {
+				if (series.options.stacking) each(chart.series, function (otherSeries) {
 					if (otherSeries.options.stacking && otherSeries.visible) otherSeries.isDirty = true;
 				});
 
@@ -5048,14 +5030,14 @@ function reverseArray(arr) {
 		/**
 		 * Show the graph
 		 */
-		show: function() {
+		show: function () {
 			this.setVisible(true);
 		},
 
 		/**
 		 * Hide the graph
 		 */
-		hide: function() {
+		hide: function () {
 			this.setVisible(false);
 		},
 
@@ -5066,7 +5048,7 @@ function reverseArray(arr) {
 		 * @param selected {Boolean} True to select the series, false to unselect. If
 		 *        undefined, the selection state is toggled.
 		 */
-		select: function(selected) {
+		select: function (selected) {
 			var series = this;
 			// if called without an argument, toggle
 			series.selected = selected = (selected === undefined) ? !series.selected : selected;
@@ -5079,7 +5061,7 @@ function reverseArray(arr) {
 		/**
 		 * Calculate the mouseover area coordinates for a given data series
 		 */
-		getAreaCoords: function() {
+		getAreaCoords: function () {
 
 			var data = this.data,
 				series = this,
@@ -5093,7 +5075,7 @@ function reverseArray(arr) {
 				dataIsReverse, i = 0,
 				ret = [];
 
-			each(series.splinedata || series.segments, function(data, i) {
+			each(series.splinedata || series.segments, function (data, i) {
 				//if (reversedXAxis) data.reverse();//reverseArray(data);
 				// Reverse the data in case of a reversed x axis. Spline data
 				// is already reversed at this point, so we need to actually
@@ -5106,7 +5088,7 @@ function reverseArray(arr) {
 				var coords = [],
 					outlineTop = [],
 					outlineBottom = [];
-				each([outlineTop, outlineBottom], function(outline) {
+				each([outlineTop, outlineBottom], function (outline) {
 					var last = 0,
 						i = 0,
 						extreme, slice, peaks = [data[0]],
@@ -5120,7 +5102,7 @@ function reverseArray(arr) {
 						if (data[i].plotX > data[last].plotX + snap || i == data.length - 1) {
 							extreme = data[i];
 							slice = data.slice(last, i - 1);
-							each(slice, function(point) {
+							each(slice, function (point) {
 								if (sign * point.plotY < sign * extreme.plotY) {
 									extreme = point;
 								}
@@ -5246,7 +5228,7 @@ function reverseArray(arr) {
 			return ret;
 		},
 
-		createArea: function() {
+		createArea: function () {
 			if (this.options.enableMouseTracking === false) return;
 
 			var area, series = this,
@@ -5262,18 +5244,18 @@ function reverseArray(arr) {
 
 
 			// remove old areas in case of updating
-			if (existingAreas) each(existingAreas, function(area) {
+			if (existingAreas) each(existingAreas, function (area) {
 				discardElement(area);
 			});
 
 			// create each area
-			each(coordsArray, function(coords) {
+			each(coordsArray, function (coords) {
 				isCircle = /^[0-9]+,[0-9]+$/.test(coords[0]);
 				area = createElement('area', {
 					shape: isCircle ? 'circle' : 'poly',
 					chart: chart,
 					coords: coords[0] + (isCircle ? ',' + chart.options.tooltip.snap : ''),
-					onmouseover: function(e) {
+					onmouseover: function (e) {
 						if (!series.visible || chart.mouseIsDown) return;
 
 						var hoverSeries = chart.hoverSeries;
@@ -5305,7 +5287,7 @@ function reverseArray(arr) {
 						series.setState('hover');
 						chart.hoverSeries = series;
 					},
-					onmouseout: function() {
+					onmouseout: function () {
 						// trigger the event only if listeners exist
 						var hoverSeries = chart.hoverSeries;
 						if (hoverSeries && options.events.mouseOut) {
@@ -5338,7 +5320,6 @@ function reverseArray(arr) {
 		}
 
 	}; // end Series prototype
-
 	/**
 	 * LineSeries object
 	 */
@@ -5363,7 +5344,7 @@ function reverseArray(arr) {
 		/**
 		 * Translate the points and get the spline data
 		 */
-		translate: function() {
+		translate: function () {
 			var series = this;
 
 			// do the partent translate
@@ -5377,7 +5358,7 @@ function reverseArray(arr) {
 		 * Draw the actual spline line with interpolated values
 		 * @param {Object} state
 		 */
-		drawLine: function(state) {
+		drawLine: function (state) {
 			var series = this,
 				realSegments = series.segments;
 
@@ -5392,20 +5373,20 @@ function reverseArray(arr) {
 		/**
 		 * Get interpolated spline values
 		 */
-		getSplineData: function() {
+		getSplineData: function () {
 			var series = this,
 				chart = series.chart,
 				//data = this.data,
 				splinedata = [],
 				num;
 
-			each(series.segments, function(data) {
+			each(series.segments, function (data) {
 				if (series.xAxis.reversed) data = data.reverse(); //reverseArray(data);
 				var croppedData = [],
 					nextUp, nextDown;
 
 				// to save calculations, only add data within the plot
-				each(data, function(point, i) {
+				each(data, function (point, i) {
 					nextUp = data[i + 2] || data[i + 1] || point;
 					nextDown = data[i - 2] || data[i - 1] || point;
 					if (nextUp.plotX > 0 && nextDown.plotY < chart.plotWidth) {
@@ -5474,7 +5455,7 @@ function reverseArray(arr) {
 	};
 	SplineHelper.prototype = {
 		// Return the two new data vectors
-		get: function(num) {
+		get: function (num) {
 			if (!num) num = 50;
 			var n = this.n;
 			var step = (this.xdata[n - 1] - this.xdata[0]) / (num - 1);
@@ -5499,7 +5480,7 @@ function reverseArray(arr) {
 		},
 
 		// Return a single interpolated Y-value from an x value
-		interpolate: function(xpoint) {
+		interpolate: function (xpoint) {
 			var max = this.n - 1;
 			var min = 0;
 
@@ -5542,7 +5523,7 @@ function reverseArray(arr) {
 	var ColumnSeries = extendClass(Series, {
 		type: 'column',
 
-		init: function() {
+		init: function () {
 			Series.prototype.init.apply(this, arguments);
 
 			var series = this,
@@ -5553,12 +5534,12 @@ function reverseArray(arr) {
 			//if (!series.options.stacking) series.countColumn = true;
 			// if the series is added dynamically, force redraw of other
 			// series affected by a new column
-			if (chart.hasRendered) each(chart.series, function(otherSeries) {
+			if (chart.hasRendered) each(chart.series, function (otherSeries) {
 				if (otherSeries.type == series.type) otherSeries.isDirty = true;
 			});
 		},
 
-		translate: function() {
+		translate: function () {
 			var series = this,
 				chart = series.chart,
 				columnCount = 0,
@@ -5568,7 +5549,7 @@ function reverseArray(arr) {
 			// Get the total number of column type series.
 			// This is called on every series. Consider moving this logic to a
 			// chart.orderStacks() function and call it on init, addSeries and removeSeries
-			each(chart.series, function(otherSeries) {
+			each(chart.series, function (otherSeries) {
 				if (otherSeries.type == series.type) {
 					if (!otherSeries.options.stacking) {
 						otherSeries.columnIndex = columnCount++;
@@ -5602,7 +5583,7 @@ function reverseArray(arr) {
 				translatedY0 = series.yAxis.translate(0);
 
 			// record the new values
-			each(data, function(point) {
+			each(data, function (point) {
 				point.plotX += pointX;
 				point.w = pointWidth;
 				point.y0 = (inverted ? plotWidth : plotHeight) - translatedY0;
@@ -5612,11 +5593,11 @@ function reverseArray(arr) {
 
 		},
 
-		drawLine: function() {},
+		drawLine: function () {},
 
-		getSymbol: function() {},
+		getSymbol: function () {},
 
-		drawPoints: function(state) {
+		drawPoints: function (state) {
 			var series = this,
 				options = series.options,
 				chart = series.chart,
@@ -5631,7 +5612,7 @@ function reverseArray(arr) {
 
 			// draw the columns
 			// todo: record the rectangle coordinates and reuse them for the mouseover area
-			each(data, function(point) {
+			each(data, function (point) {
 				if (point.plotY !== undefined) layer.drawRect(
 				inverted ? (point.h >= 0 ? chart.plotWidth - point.plotY - point.h : chart.plotWidth - point.plotY) : point.plotX, inverted ? chart.plotHeight - point.plotX - point.w : (point.h >= 0 ? point.plotY : point.plotY + point.h), // for negative bars, subtract h (Opera)
 				inverted ? mathAbs(point.h) : point.w, inverted ? point.w : mathAbs(point.h), options.borderColor, options.borderWidth, options.borderRadius, point.color || series.color, options.shadow);
@@ -5646,7 +5627,7 @@ function reverseArray(arr) {
 		/**
 		 * Draw a single point in hover state
 		 */
-		drawPointState: function(point, state, layer) {
+		drawPointState: function (point, state, layer) {
 			// local vars
 			var series = this,
 				chart = series.chart,
@@ -5679,11 +5660,11 @@ function reverseArray(arr) {
 			}
 		},
 
-		getAreaCoords: function() {
+		getAreaCoords: function () {
 			var areas = [],
 				chart = this.chart,
 				inverted = chart.inverted;
-			each(this.data, function(point) {
+			each(this.data, function (point) {
 				var pointH = mathMax(mathAbs(point.h), 3) * (point.h < 0 ? -1 : 1),
 					x1 = inverted ? chart.plotWidth - point.plotY - pointH : point.plotX,
 					y2 = inverted ? chart.plotHeight - point.plotX - point.w : point.plotY,
@@ -5708,7 +5689,7 @@ function reverseArray(arr) {
 			return areas;
 		},
 
-		cleanData: function() {
+		cleanData: function () {
 			var series = this,
 				data = series.data,
 				interval, smallestInterval, closestPoints, i;
@@ -5729,7 +5710,7 @@ function reverseArray(arr) {
 			series.closestPoints = closestPoints;
 		},
 
-		animate: function(init) {
+		animate: function (init) {
 			var series = this,
 				chart = series.chart,
 				inverted = chart.inverted,
@@ -5754,13 +5735,13 @@ function reverseArray(arr) {
 		/**
 		 * Remove this series from the chart
 		 */
-		remove: function() {
+		remove: function () {
 			var series = this,
 				chart = series.chart;
 
 			// column and bar series affects other series of the same type
 			// as they are either stacked or grouped
-			if (chart.hasRendered) each(chart.series, function(otherSeries) {
+			if (chart.hasRendered) each(chart.series, function (otherSeries) {
 				if (otherSeries.type == series.type) otherSeries.isDirty = true;
 			});
 
@@ -5771,7 +5752,7 @@ function reverseArray(arr) {
 
 	var BarSeries = extendClass(ColumnSeries, {
 		type: 'bar',
-		init: function(chart) {
+		init: function (chart) {
 			chart.inverted = this.inverted = true;
 			ColumnSeries.prototype.init.apply(this, arguments);
 		}
@@ -5787,13 +5768,13 @@ function reverseArray(arr) {
 		/**
 		 * Calculate the mouseover area coordinates for a given data series
 		 */
-		getAreaCoords: function() {
+		getAreaCoords: function () {
 
 			var data = this.data,
 				coords, ret = [];
 
 
-			each(data, function(point) {
+			each(data, function (point) {
 				// create a circle for each point
 				ret.push([[mathRound(point.plotX), mathRound(point.plotY)].join(','), point]);
 			});
@@ -5802,7 +5783,7 @@ function reverseArray(arr) {
 		/**
 		 * Cleaning the data is not necessary in a scatter plot
 		 */
-		cleanData: function() {}
+		cleanData: function () {}
 	});
 	seriesTypes.scatter = ScatterSeries;
 
@@ -5810,10 +5791,10 @@ function reverseArray(arr) {
 	 * Extended point object for pies
 	 */
 	var PiePoint = extendClass(Point, {
-		setState: function(state) {
+		setState: function (state) {
 			this.series.drawPointState(this, state);
 		},
-		init: function() {
+		init: function () {
 
 			Point.prototype.init.apply(this, arguments);
 
@@ -5836,7 +5817,7 @@ function reverseArray(arr) {
 			if (!point.layer) point.layer = new Layer('pie', series.layerGroup.div);
 
 			// add event listener for select
-			toggleSlice = function() {
+			toggleSlice = function () {
 				point.slice();
 			}
 			addEvent(point, 'select', toggleSlice);
@@ -5844,7 +5825,7 @@ function reverseArray(arr) {
 
 			return point;
 		},
-		setVisible: function(vis) {
+		setVisible: function (vis) {
 			var point = this,
 				layer = point.layer,
 				legendItem = point.legendItem;
@@ -5866,7 +5847,7 @@ function reverseArray(arr) {
 		 * @param {Boolean} sliced When undefined, the slice state is toggled.
 		 * @param {Boolean} redraw Whether to redraw the chart. True by default.
 		 */
-		slice: function(sliced, redraw) {
+		slice: function (sliced, redraw) {
 			var point = this,
 				series = point.series;
 
@@ -5891,10 +5872,10 @@ function reverseArray(arr) {
 		type: 'pie',
 		isCartesian: false,
 		pointClass: PiePoint,
-		getColor: function() {
+		getColor: function () {
 			// pie charts have a color each point
 		},
-		translate: function() {
+		translate: function () {
 			var sum = 0,
 				series = this,
 				cumulative = -0.25,
@@ -5910,7 +5891,7 @@ function reverseArray(arr) {
 
 			// get positions - either an integer or a percentage string must be given
 			positions.push(options.size);
-			positions = map(positions, function(length, i) {
+			positions = map(positions, function (length, i) {
 				return /%$/.test(length) ?
 				// i == 0: centerX, relative to width
 				// i == 1: centerY, relative to height
@@ -5919,11 +5900,11 @@ function reverseArray(arr) {
 			});
 
 			// get the total sum
-			each(data, function(point) {
+			each(data, function (point) {
 				sum += point.y;
 			});
 
-			each(data, function(point) {
+			each(data, function (point) {
 				// set start and end angle
 				fraction = sum ? point.y / sum : 0;
 				point.start = cumulative * circ;
@@ -5950,7 +5931,7 @@ function reverseArray(arr) {
 		/**
 		 * Render the graph and markers
 		 */
-		render: function() {
+		render: function () {
 			//if (!this.pointsDrawn)
 			this.drawPoints();
 			this.drawDataLabels();
@@ -5960,11 +5941,11 @@ function reverseArray(arr) {
 		 * Draw the data points
 		 * @param {Object} state The state of this graph.
 		 */
-		drawPoints: function(state) {
+		drawPoints: function (state) {
 			var series = this;
 
 			// draw the slices
-			each(this.data, function(point) {
+			each(this.data, function (point) {
 				series.drawPoint(point, point.layer.getCtx(), point.color);
 
 				if (point.visible === false) point.setVisible(false);
@@ -5978,13 +5959,13 @@ function reverseArray(arr) {
 			//series.pointsDrawn = true;
 		},
 
-		getSymbol: function() {},
+		getSymbol: function () {},
 
 
 		/**
 		 * Draw a single point in hover state
 		 */
-		drawPointState: function(point, state, layer) {
+		drawPointState: function (point, state, layer) {
 			var series = this,
 				seriesOptions = series.options;
 
@@ -6023,7 +6004,7 @@ function reverseArray(arr) {
 		 * @param {Object} color The color of the point.
 		 * @param {Object} brightness The brightness relative to the color.
 		 */
-		drawPoint: function(point, ctx, color, brightness) {
+		drawPoint: function (point, ctx, color, brightness) {
 			var options = this.options,
 				center = point.sliced ? point.centerSliced : point.center,
 				centerX = center[0],
@@ -6062,10 +6043,10 @@ function reverseArray(arr) {
 		/**
 		 * Get the coordinates for the mouse tracker area
 		 */
-		getAreaCoords: function() {
+		getAreaCoords: function () {
 			var areas = [];
 			var series = this;
-			each(this.data, function(point) {
+			each(this.data, function (point) {
 				var centerX = point.center[0],
 					centerY = point.center[1],
 					radius = point.size / 2,
@@ -6108,7 +6089,7 @@ function reverseArray(arr) {
 		/**
 		 * Extend the default setData method by first removing the old points
 		 */
-		setData: function() {
+		setData: function () {
 			// destroy old points, since the pie has one layer each point
 			var series = this,
 				data = series.data,
@@ -6125,7 +6106,7 @@ function reverseArray(arr) {
 		/**
 		 * Clear all graphics and HTML from the series layer group
 		 */
-		clear: function() {
+		clear: function () {
 			/*var stateLayers = this.stateLayers;
 		for (var state in stateLayers) {
 			stateLayers[state].clear();
@@ -6136,7 +6117,7 @@ function reverseArray(arr) {
 			this.hasDrawnDataLabels = false;
 		}*/
 			// pies have separate layers per point
-			each(this.data, function(point) {
+			each(this.data, function (point) {
 				point.layer.clear();
 				if (point.dataLabelsLayer) point.dataLabelsLayer.clear();
 				if (point.stateLayer) point.stateLayer.clear();
