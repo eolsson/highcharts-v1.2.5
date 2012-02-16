@@ -88,6 +88,7 @@
 		// lookup over the types and the associated classes
 		seriesTypes = {};
 
+	var layersToDestroy = [];
 
 	// the jQuery adapter
 	if (!globalAdapter && win.jQuery) {
@@ -1057,7 +1058,7 @@ function reverseArray(arr) {
 
 
 	var Layer = function (name, appendTo, props, styles) {
-			var layer = this,
+		var layer = this,
 				div, appendToStyle = appendTo.style;
 			props = extend({
 				className: 'highcharts-' + name
@@ -1088,6 +1089,9 @@ function reverseArray(arr) {
 
 			// save it for later
 			layer.basicSvg = layer.svg;
+
+			// Store reference in current chart's list
+			layersToDestroy.push(layer);
 		}
 	Layer.prototype = {
 		getCtx: function () {
@@ -1570,6 +1574,9 @@ function reverseArray(arr) {
 		 */
 		destroy: function () {
 			discardElement(this.div);
+			for (var prop in this) {
+				this[prop] = undefined;
+			}
 			return null;
 		}
 	};
@@ -2074,8 +2081,6 @@ function reverseArray(arr) {
 		 * Clean up memory usage
 		 */
 		function destroy() {
-
-
 			/**
 			 * Clear certain attributes from the element
 			 * @param {Object} d
@@ -2113,12 +2118,37 @@ function reverseArray(arr) {
 
 			}
 
+			// Destroy Layers
+			for (var ii = 0; ii < layersToDestroy.length; ii++) {
+				if (layersToDestroy[ii]) {
+					layersToDestroy[ii].destroy();
+					layersToDestroy[ii] = undefined;
+				}
+			}
+			layersToDestroy = [];
+
+			// Layers referenced from local vars
+			backgroundLayer = loadingLayer = plotLayer = undefined;
+
+			// Clear axes
+			for (var i = 0; i < axes.length; i++) {
+				axes[i] = undefined;
+			}
+			axes = [];
+
+			// Clear properties
+			for (var prop in chart) {
+				chart[prop] = undefined;
+			}
+
 			// destroy each series
 			each(series, function (serie) {
 				serie.destroy();
 			});
 			series = [];
 
+			// Mark chart variable to be ready for gc
+			chart = undefined;
 
 			purge(container);
 		};
@@ -4822,8 +4852,8 @@ function reverseArray(arr) {
 					// special for pies
 					if (isPie) {
 						if (!point.dataLabelsLayer) point.dataLabelsLayer = new Layer('data-labels', point.layer.div, null, {
-							zIndex: 3
-						});
+								zIndex: 3
+							});
 						dataLabelsLayer = point.dataLabelsLayer;
 					}
 
@@ -4860,8 +4890,8 @@ function reverseArray(arr) {
 			// a specific layer for the currently active point
 			if (isHoverState) {
 				if (!layer) layer = chart.singlePointLayer = new Layer('single-point', chart.plotLayer.div, null, {
-					zIndex: 3
-				});
+						zIndex: 3
+					});
 				layer.clear();
 			}
 
