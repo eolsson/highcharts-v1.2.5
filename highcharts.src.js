@@ -2095,9 +2095,9 @@ function reverseArray(arr) {
 
 						try {
 							//if (typeof d[n] != 'object' && !/^(width|height)$/.test(n)) {
-							if (typeof d[n] == 'function') {
+							//if (typeof d[n] == 'function') {
 								d[n] = null;
-							}
+							//}
 						} catch (e) {
 							// IE/excanvas produces errors on some of the properties
 						}
@@ -2112,7 +2112,10 @@ function reverseArray(arr) {
 						var node = d.childNodes[i];
 						purge(node);
 
-						if (!node.childNodes.length) discardElement(node);
+						if (!node.childNodes.length) {
+							discardElement(node);
+							node = undefined;
+						}
 					}
 				}
 
@@ -2144,8 +2147,10 @@ function reverseArray(arr) {
 			// destroy each series
 			each(series, function (serie) {
 				serie.destroy();
+				delete(serie);
 			});
 			series = [];
+			delete(series);
 
 			// Mark chart variable to be ready for gc
 			chart = undefined;
@@ -2607,9 +2612,18 @@ function reverseArray(arr) {
 			 * Set the tick positions to round values and optionally extend the extremes
 			 * to the nearest tick
 			 */
-			function setTickPositions() {
-				if (isDatetimeAxis) setDateTimeTickPositions();
-				else setLinearTickPositions();
+			function setTickPositions(labelArray) {
+				if(labelArray == undefined || labelArray.length == 0){
+						if (isDatetimeAxis)	setDateTimeTickPositions();
+						else setLinearTickPositions();
+				}else{
+					tickPositions = [];
+					for(var i=0;i<labelArray.length;i++){
+						if(labelArray[i] != undefined && labelArray[i] != ""){
+							tickPositions.push(i);
+						}
+					}
+				}
 
 				// reset min/max or remove extremes based on start/end on tick
 				var roundedMin = tickPositions[0],
@@ -2694,7 +2708,7 @@ function reverseArray(arr) {
 				minorTickInterval = (options.minorTickInterval == 'auto' && tickInterval) ? tickInterval / 5 : options.minorTickInterval;
 
 				// get fixed positions based on tickInterval
-				setTickPositions();
+				setTickPositions(options.customDateLabel);
 
 				// the translation factor used in translate function
 				transA = axisLength / ((max - min) || 1);
@@ -4090,6 +4104,7 @@ function reverseArray(arr) {
 
 			if (point.stateLayer) point.stateLayer.destroy();
 			for (prop in point) point[prop] = null;
+			point = undefined;
 		},
 
 		/**
@@ -4925,6 +4940,7 @@ function reverseArray(arr) {
 			});
 
 			for (prop in series) series[prop] = null;
+			series = undefined;
 		},
 
 		/**
